@@ -1,5 +1,8 @@
 import pandas as pd
 import os
+import re
+import numpy as np
+import matplotlib.pyplot as plt
 
 PATH = '/home/hyeuk/openquake/src/oq-master/demos/hazard/Disaggregation'
 jid = 1559
@@ -51,3 +54,12 @@ for key, value in annual_rate.items():
     weighted += weights[key] * value
 
 POE_weighted = 1 - np.exp(-weighted * inv_time)
+
+plt.figure()
+plt.semilogy(pga, poe[0, :], label='OQ')
+plt.semilogy(pga, POE_weighted, label='extract' )
+plt.xlabel('PGA(g')
+plt.ylabel(f'POE in {inv_time} years')
+plt.savefig('comp_hc_OQ_vs_extract.png')
+
+
