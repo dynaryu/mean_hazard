@@ -50,3 +50,4 @@ weighted = np.zeros_like(annual_rate[list(annual_rate.keys())[0]])
 for key, value in annual_rate.items():
     weighted += weights[key] * value
 
+POE_weighted = 1 - np.exp(-weighted * inv_time)
