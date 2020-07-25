@@ -4,9 +4,13 @@ import sys
 import re
 import numpy as np
 import matplotlib.pyplot as plt
+import socket
 
-PATH = '/home/hyeuk/openquake/src/oq-master/demos/hazard/Disaggregation'
 # see https://groups.google.com/g/openquake-users/c/VfBIx4kju3A/m/-10tppAAqjcJ
+if 'gadi' in socket.gethostname():
+    PATH = '/home/547/hxr547/Projects/demos/hazard/mean_hazard'
+else:
+    PATH = '/home/hyeuk/openquake/src/oq-master/demos/hazard/Disaggregation'
 
 def get_hcurve(hazard_curve):
     with open(hazard_curve) as f:
@@ -84,7 +88,7 @@ def main(jid):
     pga_c, poe_c, inv_time = get_hcurve(hazard_curve)
 
     # classical disagg results
-    disagg_file = os.path.join(PATH, 'output/rlz-0-PGA-sid-0-poe-0_Mag_Lon_Lat_1571.csv')
+    disagg_file = os.path.join(PATH, 'output/rlz-0-PGA-sid-0-poe-0_Mag_Lon_Lat_1.csv')
     df, poe_target = get_disagg(disagg_file)
     sdf = df.loc[df.poe > 0].copy()
     sdf['lon'] = sdf['lon'].round(decimals=2)
@@ -92,11 +96,15 @@ def main(jid):
     _file = os.path.join(PATH,'output/disagg_table_classical.csv')
     sdf.loc[sdf.norm_rate.sort_values(ascending=False).index].to_csv(_file)
 
+    # disagg mean hazard curve
+    hazard_curve = os.path.join(PATH, f'output/hazard_curve-mean-PGA_1.csv')
+    pga_d, poe_d, inv_time = get_hcurve(hazard_curve)
+
     # compare hazard curves
     plt.figure()
     plt.semilogy(pga_c, poe_c[0, :], label='OQ_classical')
     plt.semilogy(pga_e, poe_e[0, :], label='OQ_event-based')
-    #plt.semilogy(pga_e, poes, label='extracted', marker='o')
+    plt.semilogy(pga_d, poe_d[0, :], label='OQ_disagg', marker='o', linestyle='--')
     plt.xlabel('PGA(g')
     plt.ylabel(f'POE in {inv_time} years')
     plt.legend(loc=1)
